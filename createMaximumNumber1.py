@@ -50,9 +50,27 @@ class Solution(object):
 			if v1>v2:
 				v = v1
 				start1 += 1
-			else:
+			elif v2>v1:
 				v = v2
 				start2 += 1
+			else:
+				# v2 == v1, need to back check to decide
+				back_start1 = start1
+				back_start2 = start2
+				while True:
+					vv1 = n1[back_start1] if back_start1 < len1 else -1
+					vv2 = n2[back_start2] if back_start2 < len2 else -1
+					back_start1 += 1
+					back_start2 += 1
+					if vv1 != vv2 or (vv1 == vv2 and vv1 == -1):
+						if vv1 >= vv2:
+							v = v1
+							start1 += 1
+						else:
+							v = v2
+							start2 += 1
+						break
+
 
 			if renew:
 				result[idx] = v
@@ -81,19 +99,31 @@ class Solution(object):
 		sorted2 = sorted(range(n2), key=lambda v: nums2[v], reverse=True)
 
 		result = [-1] * k
-		for i in range(0, min(n1, k)):
+
+		minimum1 = k - n2
+
+		for i in range(max(0, minimum1), min(n1, k) + 1):
 			re1 = self.find_max_by_length(nums1, sorted1, n1, i)
 			re2 = self.find_max_by_length(nums2, sorted2, n2, k - i)
 			self.merge(re1, i, re2, k - i, result)
-			print result
+		return result
+
 
 
 start_time = time.time() * 1000
 array1, array2 = [], []
 
-for i in range(0, 500):
-	array1.append(random.randint(0, 9))
-	array2.append(random.randint(0, 9))
 solution = Solution()
-solution.maxNumber(array1, array2, 200)
+# for i in range(0, 500):
+# 	array1.append(random.randint(0, 9))
+# 	array2.append(random.randint(0, 9))
+# solution.maxNumber(array1, array2, 200)
+# print time.time() * 1000 - start_time
+
+
+
+print solution.maxNumber(
+	[4,6,9,1,0,6,3,1,5,2,8,3,8,8,4,7,2,0,7,1,9,9,0,1,5,9,3,9,3,9,7,3,0,8,1,0,9,1,6,8,8,4,4,5,7,5,2,8,2,7,7,7,4,8,5,0,9,6,9,2],
+    [9,9,4,5,1,2,0,9,3,4,6,3,0,9,2,8,8,2,4,8,6,5,4,4,2,9,5,0,7,3,7,5,9,6,6,8,8,0,2,4,2,2,1,6,6,5,3,6,2,9,6,4,5,9,7,8,0,7,2,3], 60)
+
 print time.time() * 1000 - start_time
