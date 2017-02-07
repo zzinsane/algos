@@ -51,7 +51,7 @@ class Solution(object):
 
 		longest = 0
 
-		stack = [0] + stack2.get() + [length + 1]
+		stack = [-1] + stack2.get() + [length]
 
 		for idx, v in enumerate(stack):
 			if idx == 0:
@@ -67,4 +67,10 @@ print solution.longestValidParentheses(")()())")
 print solution.longestValidParentheses(")()()()()(((()))))")
 solution.longestValidParentheses("((((()))")
 print solution.longestValidParentheses("()")
+print solution.longestValidParentheses("()))")
+print solution.longestValidParentheses("((())")
 print solution.longestValidParentheses("()()")
+print solution.longestValidParentheses("(()()")
+print solution.longestValidParentheses("))")
+print solution.longestValidParentheses("(")
+print solution.longestValidParentheses("())")
