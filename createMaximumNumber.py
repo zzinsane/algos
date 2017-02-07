@@ -1,1 +1,150 @@
-'''Given two arrays of length m and n with digits 0-9 representing two numbers. Create the maximum number of length k <= m + n from digits of the two. The relative order of the digits from the same array must be preserved. Return an array of the k digits. You should try to optimize your time and space complexity.Example 1:   nums1 = [3,  4,  6,  5]   nums2 = [9,  1,  2,  5,  8,  3]   k = 5   return [9,  8,  6,  5,  3]   Example 2:   nums1 = [6,  7]   nums2 = [6,  0,  4]   k = 5   return [6,  7,  6,  0,  4]   Example 3:   nums1 = [3,  9]nums2 = [8,  9]   k = 3   return [9,  8,  9]'''class MaxList:	def __init__(self, nums, initial_len):		self.nums = nums		self.length = len(nums)		self.current = initial_len		a = sorted(range(0, initial_len), cmp=lambda x, y:nums[x] - nums[y], reverse=True)		maximum = -1		for idx, n in enumerate(a):			if n > maximum:				maximum = n			else:				a[idx] = -1		a = filter(lambda x:x>=0, a)		max_list = [-1] * len(nums)		for idx, v in enumerate(a):			max_list[idx] = v		self.max_list = max_list		self.max_start = 0		self.max_end = len(a)	def total_len(self):		return self.max_end + self.length - self.current	def left_len(self):		return self.length - self.max_list[self.max_start]	def append(self, idx):		if idx >= self.length:			return		value = self.nums[idx]		new_end = self.max_end		for idx in range(self.max_start, self.max_end):			v = self.nums[self.max_list[idx]]			if v < value:				new_end = idx				break		self.max_list[new_end] = self.current		self.current += 1		self.max_end = new_end + 1	def advance(self, left):		depth = self.length - left		before_current = self.current		if depth > before_current:			for i in range(before_current, depth):				self.append(i)		else:			if depth < self.max_list[self.max_start]:				new_start = self.max_list[self.max_start - 1] + 1 if self.max_start > 0 else 0				self.max_start = new_start				self.max_end = new_start				self.current = new_start				for i in range(new_start, depth + 1):					self.append(i)				# raise Exception('impossible')			else:				pass	def top(self):		if self.max_end > self.max_start:			return self.nums[self.max_list[self.max_start]]		return -1	def next(self):		self.max_start += 1		if self.current >= self.length:			return			# raise Exception('wrong operation')		value = self.nums[self.current]		new_end = self.max_end		for idx in range(self.max_start, self.max_end):			v = self.nums[self.max_list[idx]]			if v < value:				new_end = idx				break		self.max_list[new_end] = self.current		self.current += 1		self.max_end = new_end + 1class Solution(object):	def iterate(self, maxlist1, maxlist2, result, current):		left_len = self.k - current		tops = [maxlist.top() for maxlist in [maxlist1, maxlist2]]		if tops[0] == tops[1] and (maxlist1.left_len() + maxlist2.left_len() < left_len):			# both are possible			pass		if tops[0] < tops[1]:			new_left = left_len - maxlist2.left_len()			maxlist2.max_start += 1			maxlist1.advance(new_left)			maxlist2.advance(maxlist2.left_len() - 1)		else:			new_left = left_len - maxlist1.left_len()			maxlist1.max_start += 1			maxlist2.advance(new_left)			maxlist1.advance(maxlist1.left_len() - 1)		result[current] = max(tops)		if current == self.k - 1:			return		self.iterate(maxlist1, maxlist2, result, current + 1)	def maxNumber(self, nums1, nums2, k):		self.k = k		result = [-1] * k		len1 = min(len(nums1), len(nums1) - (k-len(nums2)) + 1)		maxlist1 = MaxList(nums1, len1)		len2 = min(len(nums2), len(nums2) - (k-len(nums1)) + 1)		maxlist2 = MaxList(nums2, len2)		self.iterate(maxlist1, maxlist2, result, 0)		print result	# def maxNumber(self, nums1, nums2, k):	# 	"""	# 	:type nums1: List[int]	# 	:type nums2: List[int]	# 	:type k: int	# 	:rtype: List[int]	# 	"""	# 	len1 = min(len(nums1), len(nums1) - (k-len(nums2)) + 1)	# 	maxlist1 = MaxList(nums1, len1)	#	# 	len2 = min(len(nums2), len(nums2) - (k-len(nums1)) + 1)	# 	maxlist2 = MaxList(nums2, len2)	#	# 	if maxlist1.total_len() + maxlist2.total_len() < k:	# 		idx = 0	# 		top1 = maxlist1.top()	# 		top2 = maxlist2.top()	# 		if top1 > top2:	# 			idx = 1	#	# 		if idx == 0:	# 			maxlist2 = MaxList(nums2, )	#	#	#	# 	result = []	# 	while len(result) < k:	# 		top1 = maxlist1.top()	# 		top2 = maxlist2.top()	#	# 		if top1>top2:	# 			maxlist1.next()	# 		else:	# 			maxlist2.next()	#	# 		result.append(max(top1, top2))	#	# 	return resultsolution = Solution()# print solution.maxNumber([8, 2, 7, 4, 5, 4, 1], [1, 9, 2], 7)# print solution.maxNumber([0, 2, 7, 0, 5, 4, 1], [1, 9, 9], 7)# print solution.maxNumber([0, 2, 7, 6, 8, 8, 8, 4, 1], [1, 9], 7)print solution.maxNumber([1, 1, 1, 1, 1, 1, 7, 0, 0], [1, 2, 3, 4, 5], 7)# print solution.maxNumber1([1, 2, 7, 0, 5, 4, 1], [], 7)# print solution.maxNumber([6, 7], [6, 0, 4], 5)
+"""
+Given two arrays of length m and n with digits 0-9 representing two numbers. Create the maximum number of length k <= m + n from digits of the two. The relative order of the digits from the same array must be preserved. Return an array of the k digits. You should try to optimize your time and space complexity.
+
+Example 1:
+    nums1 = [3,  4,  6,  5]
+    nums2 = [9,  1,  2,  5,  8,  3]
+    k = 5
+    return [9,  8,  6,  5,  3]
+
+Example 2:
+    nums1 = [6,  7]
+    nums2 = [6,  0,  4]
+    k = 5
+    return [6,  7,  6,  0,  4]
+
+Example 3:
+    nums1 = [3,  9]
+    nums2 = [8,  9]
+    k = 3
+    return [9,  8,  9]
+"""
+import time
+import random
+
+
+class Solution(object):
+
+
+	def find_max_by_length(self, array, sorted_array, total, length):
+		if length == 0:
+			return []
+
+		result = [-1] * length
+		start, end = 0, 0
+		max_idx = -1
+		for idx in sorted_array:
+			if start >= length - end:
+				break
+
+			if idx < max_idx:
+				continue
+
+			left = total - idx
+			need = length - start
+
+			if need < left:
+				result[start] = array[idx]
+				start += 1
+				if idx > max_idx:
+					max_idx = idx
+			elif need == left:
+				for i in range(0, length - start):
+					result[start + i] = array[idx + i]
+
+				break
+			else:
+				if left > end:
+					for i in range(0, left - end):
+						result[length - left + i] = array[idx + i]
+					end = left
+		return result
+
+	def merge(self, n1, len1, n2, len2, result):
+		start1, start2 = 0, 0
+		idx = 0
+		renew = False
+		while idx < (len1 + len2):
+			v1 = n1[start1] if start1 < len1 else -1
+			v2 = n2[start2] if start2 < len2 else -1
+
+			if v1>v2:
+				v = v1
+				start1 += 1
+			elif v2>v1:
+				v = v2
+				start2 += 1
+			else:
+				# v2 == v1, need to back check to decide
+				back_start1 = start1
+				back_start2 = start2
+				while True:
+					vv1 = n1[back_start1] if back_start1 < len1 else -1
+					vv2 = n2[back_start2] if back_start2 < len2 else -1
+					back_start1 += 1
+					back_start2 += 1
+					if vv1 != vv2 or (vv1 == vv2 and vv1 == -1):
+						if vv1 >= vv2:
+							v = v1
+							start1 += 1
+						else:
+							v = v2
+							start2 += 1
+						break
+
+
+			if renew:
+				result[idx] = v
+			else:
+				if v > result[idx]:
+					result[idx] = v
+					renew = True
+
+				elif v < result[idx]:
+					return
+
+			idx += 1
+
+
+	def maxNumber(self, nums1, nums2, k):
+
+		n1,n2 = len(nums1), len(nums2)
+		if n1 > n2:
+			tmp = nums1
+			nums1 = nums2
+			nums2 = tmp
+
+			n1,n2 = len(nums1), len(nums2)
+
+		sorted1 = sorted(range(n1), key=lambda v: nums1[v], reverse=True)
+		sorted2 = sorted(range(n2), key=lambda v: nums2[v], reverse=True)
+
+		result = [-1] * k
+
+		minimum1 = k - n2
+
+		for i in range(max(0, minimum1), min(n1, k) + 1):
+			re1 = self.find_max_by_length(nums1, sorted1, n1, i)
+			re2 = self.find_max_by_length(nums2, sorted2, n2, k - i)
+			self.merge(re1, i, re2, k - i, result)
+		return result
+
+
+
+start_time = time.time() * 1000
+array1, array2 = [], []
+
+solution = Solution()
+# for i in range(0, 500):
+# 	array1.append(random.randint(0, 9))
+# 	array2.append(random.randint(0, 9))
+# solution.maxNumber(array1, array2, 200)
+# print time.time() * 1000 - start_time
+
+
+
+print solution.maxNumber(
+	[4,6,9,1,0,6,3,1,5,2,8,3,8,8,4,7,2,0,7,1,9,9,0,1,5,9,3,9,3,9,7,3,0,8,1,0,9,1,6,8,8,4,4,5,7,5,2,8,2,7,7,7,4,8,5,0,9,6,9,2],
+    [9,9,4,5,1,2,0,9,3,4,6,3,0,9,2,8,8,2,4,8,6,5,4,4,2,9,5,0,7,3,7,5,9,6,6,8,8,0,2,4,2,2,1,6,6,5,3,6,2,9,6,4,5,9,7,8,0,7,2,3], 60)
+
+print time.time() * 1000 - start_time
