@@ -6,7 +6,7 @@ Empty cells are indicated by the character '.'.
 
 You may assume that there will be only one unique solution.
 '''
-import operator
+import operator, copy
 
 
 class Stack(object):
@@ -35,74 +35,145 @@ class Stack(object):
 
 
 class Solution(object):
+	all_set= 511
+	num_set = {1<<i:i+1 for i in range(9)}
+
+	def find_bits(self, i, j):
+		bits = []
+		for k in range(9):
+			if self.numbers[i][j] & (1<<k):
+				bits.append(k)
+		return bits
+
+
+	def set_bits(self, idx_list):
+		missed = Solution.all_set
+		for idx, idy in idx_list:
+			value = self.cp_board[idx][idy]
+			if value != '.':
+				integer = int(value)
+				v = 1<<(integer - 1)
+				missed = operator.xor(missed, v)
+		for idx, idy in idx_list:
+			value = self.cp_board[idx][idy]
+			if value == '.':
+				self.numbers[idx][idy] = self.numbers[idx][idy] & missed
+
+	def propogate(self, i, j, idx_list):
+		xored = self.numbers[i][j]
+		for idx, idy in idx_list:
+			composed = idx + idy * 10
+			if self.cp_board[idx][idy] !='.' or self.bits_set_array[idx][idy]:
+				continue
+			value = self.numbers[idx][idy] & ~ xored
+
+			self.numbers[idx][idy] = value
+			if value in Solution.num_set:
+				self.stack.push(composed)
+				self.bits_set_array[idx][idy] = True
+				print "==>", composed, bin(value), idx_list
+				print "00000000000000000000000"
+				self.print_all()
+
+	def fill_board(self):
+		while True:
+			idx_v = self.stack.pop()
+			if idx_v is None:
+				break
+
+			i, j = idx_v %10, idx_v /10
+			self.board[i][j] = '%s' % self.num_set.get(self.numbers[i][j])
+			self.propogate(i, j, [(i, jj) for jj in range(9)])
+			self.propogate(i, j, [(ii, j) for ii in range(9)])
+
+			idx_list = []
+			i_start, j_start = (i / 3)*3, (j/3)*3
+			for i1 in range(3):
+				for j1 in range(3):
+					idx_list.append((i_start+i1, j_start+j1))
+			self.propogate(i, j, idx_list)
+
+	def print_all(self):
+
+		for i in range(9):
+			ele = []
+			for j in range(9):
+				if self.board[i][j] == '.':
+					candidates = []
+					for k in range(9):
+						if self.numbers[i][j] & (1<<k):
+
+							candidates.append("%s" % (k+1))
+					ele.append(''.join(candidates))
+				else:
+					ele.append(self.board[i][j])
+			print ele
+
+
 	def solveSudoku(self, board):
-		"""
-		:type board: List[List[str]]
-		:rtype: void Do not return anything, modify board in-place instead.
-		"""
-		all_set = 511
-		num_set = set([1<<i for i in range(9)])
-		numbers = []
+		numebrs = []
+		self.bits_set_array = []
 		for i in range(9):
-			numbers.append([0]*9)
+			numebrs.append([Solution.all_set] * 9)
+			self.bits_set_array.append([False] * 9)
+		self.numbers = numebrs
+		self.board = board
 
-		for idx, x in enumerate(board):
-			missed = all_set
-			for idy, y in enumerate(x):
-				if y != '.':
-					integer = int(y)
-					v = 1<<(integer - 1)
-					missed = operator.xor(missed, v)
-
-			for idy, y in enumerate(x):
-				if y == '.':
-					numbers[idx][idy] = missed
-
-		stack = Stack(81)
-
+		self.cp_board = copy.deepcopy(board)
 		for i in range(9):
-			missed = all_set
-			for j in range(9):
-				if board[j][i] != '.':
-					integer = int(board[j][i])
-					v = 1 << (integer - 1)
-					missed = operator.xor(missed, v)
+			self.set_bits([(i, j) for j in range(9)])
+		for j in range(9):
+			self.set_bits([(i, j) for i in range(9)])
 
+		for i in range(3):
+			for j in range(3):
+				idx_list = []
+				for i1 in range(3):
+					for j1 in range(3):
+						idx_list.append((i*3+i1, j*3+j1))
+				self.set_bits(idx_list)
+
+		self.stack = Stack(81)
+		for i in range(9):
 			for j in range(9):
-				if board[j][i] == '.':
-					numbers[j][i] = numbers[j][i] & missed
-					if numbers[j][i] in num_set:
-						stack.push(j + i*10)
-		for idd, x in enumerate(numbers):
-			print x
+				if numebrs[i][j] in Solution.num_set:
+					self.stack.push(i + j*10)
+					self.bits_set_array[i][j] = True
+
+		self.fill_board()
+		self.print_all()
 
 		while True:
-			idx_v = stack.pop()
-			if idx_v is None:
-				return
-			i, j = idx_v %10, idx_v /10
-			matched = numbers[i][j]
-			print i, j, numbers[i][j]
-
-			for idx, vv in enumerate(numbers[i]):
-				if vv == 0 or idx == j:
-					continue
-				vv = operator.xor(vv, matched)
-				numbers[i][idx] = vv
-				if vv in num_set:
-					stack.push((i, idx))
-
-			for ii in range(9):
-				vv = numbers[ii][j]
-				if vv == 0 or ii == i:
-					continue
-				vv = operator.xor(vv, matched)
-				numbers[ii][j] = vv
-				if vv in num_set:
-					stack.push((ii, j))
+			next_i, next_j = -1, -1
+			min_sofar = 1000
 
 
+			for i in range(9):
+				for j in range(9):
+					if self.board[i][j] == '.':
+						candidates = self.find_bits(i, j)
+						if len(candidates) < min_sofar:
+							min_sofar = len(candidates)
+							next_i, next_j = i, j
+			if next_i == -1:
+				break
 
+			candidates = self.find_bits(i, j)
+
+
+			for k in range(9):
+				if self.numbers[next_i][next_j] & (1<<k):
+					self.numbers[next_i][next_j] = 1<<k
+					self.stack.push(next_i + next_j * 10)
+					self.bits_set_array[next_i][next_j] = True
+					break
+
+			self.print_all()
+			print next_i, next_j
+			print "+++++++++++++++++++++++++++"
+			self.fill_board()
+			self.print_all()
+			print '----------------------------'
 
 
 solution = Solution()
@@ -117,4 +188,26 @@ input = [
 	['.', '.', '.', '4', '1', '9', '.', '.', '5'],
 	['.', '.', '.', '.', '8', '.', '.', '7', '9'],
 ]
-solution.solveSudoku(input)
+
+input = [
+	"..9748...",
+	"7........",
+	".2.1.9...",
+	"..7...24.",
+	".64.1.59.",
+	".98...3..",
+	"...8.3.2.",
+	"........6",
+	"...2759.."]
+c_input = []
+for s in input:
+	c_input.append([s[i:i+1] for i in range(9)])
+
+
+solution.solveSudoku(c_input)
+for x in c_input:
+	print x
+
+#["..9748...","7..6.2...",".2.1.9...","..7986241","264317598","198524367","...863.2.","...491..6","...2759.."]
+#["519748632","783652419","426139875","357986241","264317598","198524367","975863124","832491756","641275983"]
+
