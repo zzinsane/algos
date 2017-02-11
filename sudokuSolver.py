@@ -32,6 +32,9 @@ class Stack(object):
 	def get(self):
 		return self.stack[:self.top_idx]
 
+	def length(self):
+		return self.top_idx
+
 
 
 class Solution(object):
@@ -63,17 +66,19 @@ class Solution(object):
 		xored = self.numbers[i][j]
 		for idx, idy in idx_list:
 			composed = idx + idy * 10
+			value = self.numbers[idx][idy]
 			if self.cp_board[idx][idy] !='.' or self.bits_set_array[idx][idy]:
+				if value == xored and not (idx == i and idy == j):
+					return False
+
 				continue
-			value = self.numbers[idx][idy] & ~ xored
+			value = value & ~ xored
 
 			self.numbers[idx][idy] = value
 			if value in Solution.num_set:
 				self.stack.push(composed)
 				self.bits_set_array[idx][idy] = True
-				print "==>", composed, bin(value), idx_list
-				print "00000000000000000000000"
-				self.print_all()
+		return True
 
 	def fill_board(self):
 		while True:
@@ -83,15 +88,20 @@ class Solution(object):
 
 			i, j = idx_v %10, idx_v /10
 			self.board[i][j] = '%s' % self.num_set.get(self.numbers[i][j])
-			self.propogate(i, j, [(i, jj) for jj in range(9)])
-			self.propogate(i, j, [(ii, j) for ii in range(9)])
+			if not self.propogate(i, j, [(i, jj) for jj in range(9)]):
+				return False
+
+			if not self.propogate(i, j, [(ii, j) for ii in range(9)]):
+				return False
 
 			idx_list = []
 			i_start, j_start = (i / 3)*3, (j/3)*3
 			for i1 in range(3):
 				for j1 in range(3):
 					idx_list.append((i_start+i1, j_start+j1))
-			self.propogate(i, j, idx_list)
+			if not self.propogate(i, j, idx_list):
+				return False
+		return True
 
 	def print_all(self):
 
@@ -107,7 +117,8 @@ class Solution(object):
 					ele.append(''.join(candidates))
 				else:
 					ele.append(self.board[i][j])
-			print ele
+			ele_cp = ["%5s"%n for n in ele]
+			print ele_cp
 
 
 	def solveSudoku(self, board):
@@ -117,6 +128,7 @@ class Solution(object):
 			numebrs.append([Solution.all_set] * 9)
 			self.bits_set_array.append([False] * 9)
 		self.numbers = numebrs
+		self.final_board = board
 		self.board = board
 
 		self.cp_board = copy.deepcopy(board)
@@ -141,12 +153,11 @@ class Solution(object):
 					self.bits_set_array[i][j] = True
 
 		self.fill_board()
-		self.print_all()
+		self.stak2 = Stack(81)
 
 		while True:
 			next_i, next_j = -1, -1
 			min_sofar = 1000
-
 
 			for i in range(9):
 				for j in range(9):
@@ -156,24 +167,41 @@ class Solution(object):
 							min_sofar = len(candidates)
 							next_i, next_j = i, j
 			if next_i == -1:
+				for i in range(9):
+					for j in range(9):
+						self.final_board[i][j] = self.board[i][j]
 				break
 
-			candidates = self.find_bits(i, j)
+			candidates = self.find_bits(next_i, next_j)
+			self.stak2.push([(next_i, next_j), candidates, 0, copy.deepcopy(self.numbers), copy.deepcopy(self.bits_set_array), copy.deepcopy(self.board), self.stack.length()])
+			self.numbers[next_i][next_j] = 1<<candidates[0]
+			self.stack.push(next_i + next_j * 10)
+			self.bits_set_array[next_i][next_j] = True
 
-
-			for k in range(9):
-				if self.numbers[next_i][next_j] & (1<<k):
-					self.numbers[next_i][next_j] = 1<<k
-					self.stack.push(next_i + next_j * 10)
-					self.bits_set_array[next_i][next_j] = True
-					break
-
-			self.print_all()
-			print next_i, next_j
-			print "+++++++++++++++++++++++++++"
-			self.fill_board()
-			self.print_all()
-			print '----------------------------'
+			re = self.fill_board()
+			if not re:
+				while True:
+					ele = self.stak2.pop()
+					if ele is None:
+						print "not possible!!!"
+					[idxes, candidates, candidates_dix, numebrs_cp, bits_set_cp, board_cp, stack_len] = ele
+					if candidates_dix < len(candidates) - 1:
+						ele[2] += 1
+						self.numbers = numebrs_cp
+						self.bits_set_array = bits_set_cp
+						self.board = board_cp
+						while self.stack.length() > stack_len:
+							self.stack.pop()
+						self.numbers[idxes[0]][idxes[1]] = 1<<candidates[ele[2]]
+						self.stack.push(idxes[0] + idxes[1] * 10)
+						self.bits_set_array[idxes[0]][idxes[1]] = True
+						re = self.fill_board()
+						if re:
+							break
+						else:
+							self.stak2.push(ele)
+					else:
+						continue
 
 
 solution = Solution()
