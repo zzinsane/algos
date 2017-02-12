@@ -48,7 +48,8 @@ class Solution(object):
 		while start:
 			total += 1
 			start = start.next
-		print total
+		if total < k:
+			return head
 
 		iterate = total / k
 
@@ -86,21 +87,22 @@ class Solution(object):
 
 			last_round_last = before_cp
 			head = after
-		last_round_last.next= head
+		if total % k != 0:
+			last_round_last.next= head
 
 		return first
 
 
 l = ListNode(1)
 s = l
-for i in range(2, 10):
+for i in range(2, 3):
 	l.next = ListNode(i)
 	l = l.next
 
 solution = Solution()
-solution.print_all(s)
+# solution.print_all(l)
 
-s = solution.reverseKGroup(s, 3)
+s = solution.reverseKGroup(s, 2)
 solution.print_all(s)
 
 
