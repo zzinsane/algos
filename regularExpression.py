@@ -28,6 +28,31 @@ class Stack(object):
 
 
 class Solution(object):
+
+	@classmethod
+	def compress(cls, string):
+		p_total = len(string)
+		cp_p = []
+		previous = ''
+		cursor = 0
+		while True:
+			if cursor >= p_total:
+				break
+			char = string[cursor]
+			next_char = string[cursor + 1] if cursor + 1 < p_total else ''
+			if next_char == '*':
+				if char != previous:
+					previous = char
+					cp_p.extend([char, '*'])
+
+				cursor += 2
+				continue
+			cp_p.append(char)
+			previous = ''
+			cursor += 1
+
+		return ''.join(cp_p)
+
 	def match(self, char_s, char_p):
 		if char_s == char_p or (char_p == '.'):
 			return True
@@ -47,6 +72,9 @@ class Solution(object):
 		:type p: str
 		:rtype: bool
 		"""
+
+		p = Solution.compress(p)
+
 		s_start = 0
 		p_start = 0
 		s_total, p_total = len(s), len(p)
@@ -72,7 +100,7 @@ class Solution(object):
 
 			while True:
 				last_match = stack.pop()
-				print last_match
+				# print last_match
 				if last_match is None:
 					return False
 				star_p_start, star_s_start, match_len = last_match[0], last_match[1], last_match[2]
@@ -94,5 +122,10 @@ solution = Solution()
 # print solution.isMatch('ababa', "aba*.*ab")
 # print solution.isMatch('ababa', ".*")
 # print solution.isMatch("aab", "c*a*b")
-print solution.isMatch("aaaaaaaaaaaaab", "a*a*a*a*a*a*a*a*a*a*c")
+print solution.isMatch("aaaaaaaaaaaaab", "a*a*a*a*a*b*a*a*a*a*b")
+print solution.isMatch("aaaaaaaaaaaaab", "a*b*a*b")
+print solution.isMatch("aaaaaaaaaaaaab", "a*b*b*aaa*a*")
+print solution.isMatch("aaaaaaaaaaaaab", "bbssa*b*a*a*a*cc")
+print solution.isMatch("aaaaaaaaaaaaab", "a*b*a*b*a*b*a*b*c")
+# print solution.isMatch("aaaaaaaaaaaaab", "a*b*c*d*e*a*b*x")
 # print solution.isMatch("aaaaaab", "a*a*a*a*a*a*a*c")
