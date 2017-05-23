@@ -13,9 +13,11 @@ Subscribe to see which companies asked this question.
 class Solution(object):
 	def longestConsecutive(self, nums):
 		"""
-		:type nums: List[int]
+		:t
+		ype nums: List[int]
 		:rtype: int
 		"""
+
 		length = len(nums)
 
 		next_arr = [None] * length
