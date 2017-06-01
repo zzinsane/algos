@@ -55,7 +55,7 @@ type RuleEle struct {
 }
 
 func isScrambleByIdx(idxArray []int) bool {
-	//fmt.Println(idxArray)
+	fmt.Println(idxArray)
 	last := -1
 
 	CheckStack.Clear()
@@ -197,4 +197,5 @@ func main() {
 	fmt.Println(isScramble("abcd", "cbda"))
 	fmt.Println(isScramble("bdac", "abcd"))
 
+	fmt.Println(isScramble("abcd", "acdb"))
 }
