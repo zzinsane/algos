@@ -1,19 +1,27 @@
 package main
 
+/*
+Given a string S and a string T, count the number of distinct subsequences of T in S.
+
+A subsequence of a string is a new string which is formed from the original string by deleting some (can be none) of the characters without disturbing the relative positions of the remaining characters. (ie, "ACE" is a subsequence of "ABCDE" while "AEC" is not).
+
+Here is an example:
+S = "rabbbit", T = "rabbit"
+
+Return 3.
+*/
 import "fmt"
 
 type Ele struct {
-	Idx     int
+	Idx int
 
 	Options []int
 	Current int
 }
 
 var (
-
 	byteMapping = make(map[byte][]int)
-	cache = make(map[string]int)
-
+	cache       = make(map[string]int)
 )
 
 func numDistinctRecursion(t string, s string, indexT, indexS int) int {
@@ -22,9 +30,9 @@ func numDistinctRecursion(t string, s string, indexT, indexS int) int {
 		return value
 	}
 
-	if indexT >= len(t) - 1 {
+	if indexT >= len(t)-1 {
 		indexes := byteMapping[t[indexT]]
-		for _, v := range indexes{
+		for _, v := range indexes {
 			if v >= indexS {
 				return 1
 			}
@@ -33,11 +41,11 @@ func numDistinctRecursion(t string, s string, indexT, indexS int) int {
 	}
 
 	total := 0
-	b := t[indexT + 1]
+	b := t[indexT+1]
 	indexes := byteMapping[b]
 	for _, v := range indexes {
 		if v > indexS {
-			a:=numDistinctRecursion(t, s, indexT + 1, v)
+			a := numDistinctRecursion(t, s, indexT+1, v)
 			total += a
 		}
 	}
@@ -47,11 +55,10 @@ func numDistinctRecursion(t string, s string, indexT, indexS int) int {
 	return total
 }
 
-
 func numDistinct(s string, t string) int {
-		if len(s) < len(t) {
+	if len(s) < len(t) {
 		return 0
-		}
+	}
 
 	if len(s) == 0 || len(t) == 0 {
 		return 1
@@ -73,8 +80,8 @@ func numDistinct(s string, t string) int {
 	a := t[0]
 	indexes := byteMapping[a]
 	for _, index := range indexes {
-		a:=numDistinctRecursion(t, s, 0, index)
-		total+= a
+		a := numDistinctRecursion(t, s, 0, index)
+		total += a
 	}
 
 	return total
@@ -160,7 +167,7 @@ func numDistinct(s string, t string) int {
 //
 //}
 
-func main(){
+func main() {
 
 	fmt.Println(numDistinct("", "a"))
 	fmt.Println(numDistinct("", ""))
