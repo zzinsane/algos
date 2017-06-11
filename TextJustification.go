@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -11,7 +12,7 @@ var (
 func singleLinePadding(words []string, maxWidth int, isLastLine bool) string {
 	if isLastLine {
 		joined := strings.Join(words, separator)
-		joined = joined + strings.Repeat(separator, maxWidth - len(joined))
+		joined = joined + strings.Repeat(separator, maxWidth-len(joined))
 		return joined
 	}
 
@@ -23,22 +24,22 @@ func singleLinePadding(words []string, maxWidth int, isLastLine bool) string {
 	}
 
 	if length == 1 {
-		return words[0] + strings.Repeat(separator, maxWidth - total)
+		return words[0] + strings.Repeat(separator, maxWidth-total)
 	}
 
-	each := (maxWidth - total)/(length - 1)
-	surplus := (maxWidth -total)%(length - 1)
+	each := (maxWidth - total) / (length - 1)
+	surplus := (maxWidth - total) % (length - 1)
 
 	final := ""
-	for i:=0;i<surplus;i++ {
+	for i := 0; i < surplus; i++ {
 		final += words[i]
-		final += strings.Repeat(separator, each + 1)
+		final += strings.Repeat(separator, each+1)
 	}
-	for i:=surplus;i<length - 1;i++ {
+	for i := surplus; i < length-1; i++ {
 		final += words[i]
 		final += strings.Repeat(separator, each)
 	}
-	final += words[length - 1]
+	final += words[length-1]
 	return final
 }
 
@@ -69,7 +70,7 @@ func fullJustify(words []string, maxWidth int) []string {
 				break
 			}
 		}
-		returnStrs = append(returnStrs, singleLinePadding(words[currentStart:start], maxWidth, start == total ))
+		returnStrs = append(returnStrs, singleLinePadding(words[currentStart:start], maxWidth, start == total))
 		if start >= total {
 			break
 		}
@@ -78,6 +79,6 @@ func fullJustify(words []string, maxWidth int) []string {
 }
 
 func main() {
-	fullJustify([]string{ "This", "is", "an", "example", "of", "text", "justification.", "ad", "erf", "dsfdf"}, 16)
-	fmt.Println(fullJustify([]string{ "This", "is", "an", "example", "of", "text", "justification.", }, 16))
+	fullJustify([]string{"This", "is", "an", "example", "of", "text", "justification.", "ad", "erf", "dsfdf"}, 16)
+	fmt.Println(fullJustify([]string{"This", "is", "an", "example", "of", "text", "justification."}, 16))
 }

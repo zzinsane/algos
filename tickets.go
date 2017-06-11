@@ -13,10 +13,10 @@ import (
 
 var (
 	records = make([]bool, 31)
-	length = 0
+	length  = 0
 )
 
-func SolutionRecursion(A[]int, start int) int {
+func SolutionRecursion(A []int, start int) int {
 	if start >= length {
 		return 0
 	}
@@ -24,13 +24,13 @@ func SolutionRecursion(A[]int, start int) int {
 	startDate := A[start]
 
 	minimum := 0
-	for i:=start;i<length;i++ {
-		if records[A[i]]{
+	for i := start; i < length; i++ {
+		if records[A[i]] {
 			minimum += 2
 		}
 	}
 
-	for i:=start;i<length;i++ {
+	for i := start; i < length; i++ {
 		value := A[i]
 
 		if value < 0 {
@@ -42,20 +42,20 @@ func SolutionRecursion(A[]int, start int) int {
 			first = start
 		}
 		current := 0
-		for k := value; k>=first; k-- {
+		for k := value; k >= first; k-- {
 			if records[k] {
 				current += 1
 			}
 		}
 		if current >= 4 {
 			singles := 0
-			for j:=startDate;j<first;j++ {
+			for j := startDate; j < first; j++ {
 				if records[j] {
 					singles += 1
 				}
 			}
-			current := singles * 2 + 7 + SolutionRecursion(A, i+1)
-			if minimum > current{
+			current := singles*2 + 7 + SolutionRecursion(A, i+1)
+			if minimum > current {
 				minimum = current
 			}
 		}
@@ -73,14 +73,14 @@ func Solution(A []int) int {
 	for _, value := range A {
 		records[value] = true
 	}
-	result :=  SolutionRecursion(A, 0)
+	result := SolutionRecursion(A, 0)
 	if result > 25 {
 		return 25
 	}
 	return result
 }
 
-func main(){
+func main() {
 	//fmt.Println(Solution([]int{1, 2, 3, 4, 16, 17, 18, 19, 21}))
 	fmt.Println(Solution([]int{1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 15, 16}))
 	fmt.Println(Solution([]int{1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 15, 16, 29, 30}))

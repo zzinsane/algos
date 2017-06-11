@@ -25,18 +25,18 @@ func Solution(T []int) []int {
 	queue := make(chan int, length)
 	queue <- capital
 
-	result := make([]int, length - 1)
+	result := make([]int, length-1)
 	steps := -1
 	for {
 		if len(queue) == 0 {
 			break
 		}
 		qlen := len(queue)
-		if steps >=0 {
+		if steps >= 0 {
 			result[steps] = len(queue)
 		}
-		for i:=0;i<qlen;i++ {
-			city := <- queue
+		for i := 0; i < qlen; i++ {
+			city := <-queue
 			for _, v := range idxes[city] {
 				queue <- v
 			}
@@ -47,7 +47,6 @@ func Solution(T []int) []int {
 	return result
 }
 
-func main(){
+func main() {
 	fmt.Println(Solution([]int{9, 1, 4, 9, 0, 4, 8, 9, 0, 1}))
 }
-

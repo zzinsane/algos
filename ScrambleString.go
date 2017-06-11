@@ -2,7 +2,6 @@ package main
 
 import "fmt"
 
-
 var (
 	CheckStack *Stack
 )
@@ -23,7 +22,6 @@ func (stack *Stack) Enqueue(rule *RuleEle) {
 	stack.top += 1
 }
 
-
 func (stack *Stack) Clear() {
 	stack.top = 0
 }
@@ -34,7 +32,7 @@ func (stack *Stack) Top() *RuleEle {
 		return nil
 	}
 
-	return stack.Eles[stack.top - 1]
+	return stack.Eles[stack.top-1]
 }
 
 func (stack *Stack) Dequeue() *RuleEle {
@@ -48,10 +46,10 @@ func (stack *Stack) Dequeue() *RuleEle {
 }
 
 type RuleEle struct {
-	t string
-	start    int
-	end      int
-	missing  int
+	t       string
+	start   int
+	end     int
+	missing int
 }
 
 func isScrambleByIdx(idxArray []int) bool {
@@ -88,16 +86,15 @@ func isScrambleByIdx(idxArray []int) bool {
 			break
 		}
 
-
 		var t string
 		var start int
 		var end int
 
-		if val > last + 1 {
+		if val > last+1 {
 			t = "+"
 			start = last + 1
 			end = val
-		} else if val < last - 1 {
+		} else if val < last-1 {
 			t = "-"
 			start = val + 1
 			end = last
@@ -106,15 +103,15 @@ func isScrambleByIdx(idxArray []int) bool {
 		if t != "" {
 			missing := 0
 			//fmt.Println(bitArray)
-			for i :=start;i <end;i++ {
-				if ! bitArray[i] {
+			for i := start; i < end; i++ {
+				if !bitArray[i] {
 					missing += 1
 				}
 			}
 			rule := &RuleEle{
-				t:t,
-				start:start - 1,
-				end: end,
+				t:       t,
+				start:   start - 1,
+				end:     end,
 				missing: missing,
 			}
 			CheckStack.Enqueue(rule)
@@ -127,11 +124,10 @@ func isScrambleByIdx(idxArray []int) bool {
 }
 
 type IterEle struct {
-	char byte
-	idxs []int
+	char   byte
+	idxs   []int
 	cursor int
 }
-
 
 func enumberCombination(s2 string, idx int, mapping map[byte]map[int]int, idxArray []int) bool {
 	if idx == len(s2) {
@@ -141,11 +137,11 @@ func enumberCombination(s2 string, idx int, mapping map[byte]map[int]int, idxArr
 	char := s2[idx]
 	subMapping, _ := mapping[char]
 
-	for key, value := range subMapping{
+	for key, value := range subMapping {
 		if value == 1 {
 			idxArray[idx] = key
 			subMapping[key] = 0
-			re := enumberCombination(s2, idx + 1, mapping, idxArray)
+			re := enumberCombination(s2, idx+1, mapping, idxArray)
 			if re {
 				return true
 			}
@@ -162,7 +158,7 @@ func isScramble(s1 string, s2 string) bool {
 	length := len(s1)
 	CheckStack = &Stack{
 		Eles: make([]*RuleEle, length),
-		top: 0,
+		top:  0,
 		size: length,
 	}
 	chaMapping := make(map[byte][]int)
@@ -189,8 +185,6 @@ func isScramble(s1 string, s2 string) bool {
 	}
 	return enumberCombination(s2, 0, idxMapping, make([]int, len(s2)))
 }
-
-
 
 func main() {
 	fmt.Println(isScramble("12345", "52413"))
